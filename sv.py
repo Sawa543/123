@@ -4,9 +4,10 @@
 #实验环境：
 # Windows操作系统，python 3.8.2,Visual Studio Code 1.44版
 #程序运行过程：
-# 1.程序运行时，首先读取这四个数据集
+#1.程序运行时，首先读取这四个数据集
 #2.输入一个k值（整数）作为kNN算法的k值
-#3.输入一个i值（整数）来代表想要测试的数据
+#3.程序会自动从第1000个测试集数据开始到第5000个测试集数据每隔350进行一次KNN算法，并把分类结果在终端显示
+#4.输入一个i值（整数）来代表想要测试的数据
 #4.对测试集中第i个数据利用kNN算法进行标签分类
 #5.在中端显示区会显示测试数据的k个近邻数据的标签，测试数据的实际标签以及利用KNN算法所得的标签
 #6.图像窗口显示第i个手写数据,标题为测试数据实际的标签和利用kNN算法所得的标签
@@ -99,12 +100,10 @@ def display(testX,outputLabel):
     plt.close
     return 0
 
-
 file1='D:/AI/train-images.idx3-ubyte'   #训练集数据文件名（包含文件路径）
 file2='D:/AI/train-labels.idx1-ubyte'	#训练集标签文件名
 file3='D:/AI/t10k-images.idx3-ubyte'    #测试集数据文件名
 file4='D:/AI/t10k-labels.idx1-ubyte'    #测试集标签文件名
-
 
 #生成数据集和类别标签
 dataSet=loadImageSet(file1)
@@ -113,6 +112,13 @@ dataTest=loadImageSet(file3)
 labelsTest=loadLabelSet(file4)
 
 k=int(input("input a number k as the k value of kNN algorithm:"))   #输入一个整数k,作为kNN算法的k值
+
+for a in range(1000,5000,350):				           
+    testX1=dataTest[a,:]		#从测试数据集和类别标签中取出第i
+    truelabelX1=labelsTest[a]
+    outputLabelX1=kNNClassify(testX1,dataSet,labels,k)
+    print( " testdata's real label:",truelabelX1,end=',')
+    print( " its classified label:",outputLabelX1) 
 
 i=int(input("input a number i as the testdata:"))                   #输入一个整数i,表示选择第i个测试数据 
 testX=dataTest[i,:]		#从测试数据集和类别标签中取出第i个数据和标签
