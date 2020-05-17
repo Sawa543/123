@@ -6,7 +6,7 @@
 #程序运行过程：
 #1.程序运行时，首先读取这四个数据集
 #2.输入一个k值（整数）作为kNN算法的k值
-#3.程序会自动从第1000个测试集数据开始到第5000个测试集数据每隔350进行一次KNN算法，并把分类结果在终端显示
+#3.程序会计算前1000个测试数据集利用KNN算法所得分类结果，计算正确率并显示
 #4.输入一个i值（整数）来代表想要测试的数据
 #4.对测试集中第i个数据利用kNN算法进行标签分类
 #5.在中端显示区会显示测试数据的k个近邻数据的标签，测试数据的实际标签以及利用KNN算法所得的标签
@@ -31,7 +31,7 @@ def loadLabelSet(filename):
     labels=struct.unpack_from(numString,buffers,offset)
     binfile.close()
     labels=np.reshape(labels,(labelNum))#转化为一维数组（列向量）
-    return labels
+    return labels,labelNum
 
 #读取训练集特征数据的二进制文件，生成一个N*M的矩阵，N表示数据的个数，M=28*28
 def loadImageSet(filename):
@@ -46,7 +46,14 @@ def loadImageSet(filename):
     bitsString='>'+str(bits)+'B'
     imgs=struct.unpack_from(bitsString,buffers,offset)
     binfile.close()
-    imgs=np.reshape(imgs,(imgNum,width*height))
+    list1=[]
+    for i in range(bits):
+        if imgs[i]>127:
+            list1.append(1)
+        else:
+            list1.append(0)
+    tuple(list1)
+    imgs=np.reshape(list1,(imgNum,width*height))
     return imgs
 
 # kNN: k Nearest Neighbours
@@ -69,11 +76,11 @@ def kNNClassify(newInput,dataSet,labels,k):
 	#step2:对距离排序
     sortDistIndices=np.argsort(distance)		#argsort()返回排序后的索引值
     classCount={}				                #定义一个空字典，方便添加元素,key=标签，value=该标签出现的次数
-    print('testdata\'s',k,'near data\'s label is',end=' ')
+    #print('testdata\'s',k,'near data\'s label is',end=' ')
     for i in range(k):				            #0-(k-1)
        	#step3:选择k个近邻
         voteLabel=labels[sortDistIndices[i]]	#第i个近邻的标签
-        print( voteLabel,end=',')               #显示测试集数据的k个近邻的标签
+        #print( voteLabel,end=',')               #显示测试集数据的k个近邻的标签
 	    #step4:计算k个最近邻中各类别出现的次数
         classCount[voteLabel]=classCount.get(voteLabel,0)+1
 	#step5:返回出现次数最多的类别标签
@@ -100,30 +107,35 @@ def display(testX,outputLabel):
     plt.close
     return 0
 
+
 file1='D:/AI/train-images.idx3-ubyte'   #训练集数据文件名（包含文件路径）
 file2='D:/AI/train-labels.idx1-ubyte'	#训练集标签文件名
 file3='D:/AI/t10k-images.idx3-ubyte'    #测试集数据文件名
 file4='D:/AI/t10k-labels.idx1-ubyte'    #测试集标签文件名
 
+
 #生成数据集和类别标签
 dataSet=loadImageSet(file1)
-labels=loadLabelSet(file2)
+labels,num1=loadLabelSet(file2)
 dataTest=loadImageSet(file3)
-labelsTest=loadLabelSet(file4)
+labelsTest,num2=loadLabelSet(file4)
 
 k=int(input("input a number k as the k value of kNN algorithm:"))   #输入一个整数k,作为kNN算法的k值
-
-for a in range(1000,5000,350):				           
-    testX1=dataTest[a,:]		#从测试数据集和类别标签中取出第i
+num=0
+for a in range(2000):				           
+    testX1=dataTest[a,:]		#从测试数据集和类别标签中取出第i个数据
     truelabelX1=labelsTest[a]
     outputLabelX1=kNNClassify(testX1,dataSet,labels,k)
-    print( " testdata's real label:",truelabelX1,end=',')
-    print( " its classified label:",outputLabelX1) 
+    #print( " testdata's real label:",truelabelX1,end=',')
+    #print( " its classified label:",outputLabelX1)
+    if outputLabelX1==truelabelX1:
+        num=num+1
+print("前2000个测试数据在k值为",k,"时的正确率为",num/2000)
 
 i=int(input("input a number i as the testdata:"))                   #输入一个整数i,表示选择第i个测试数据 
 testX=dataTest[i,:]		#从测试数据集和类别标签中取出第i个数据和标签
 truelabel=labelsTest[i]
 outputLabel=kNNClassify(testX,dataSet,labels,k)
 print( " testdata's real label:",truelabel,end=',')
-print( " its classified label:",outputLabel)	
+print( " its classified label:",outputLabel)
 display(testX,outputLabel)          #用图像显示这个测试数据
