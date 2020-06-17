@@ -9,4 +9,4 @@
 
 4.python语言显示MNIST图片：https://www.cnblogs.com/zhouyang209117/p/6436751.html
 
-sv.py是利用knn实现手写数据集分类的代码实现。
+sv.py是利用knn实现手写数据集分类的python语言实现代码。
